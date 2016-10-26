@@ -1,3 +1,49 @@
 #!/usr/bin/env bash
 
-sqlite3 -line ~/cli.db 'SELECT * FROM commands ORDER BY datetime DESC LIMIT 3;'
+set -e
+
+usage() {
+    cat<<HELP
+$(basename "$0") [OPTIONS]
+
+OPTIONS:
+    -[NUM]       Where [NUM] is the number of commands to show
+
+EXAMPLE:
+
+    Show last 5 commands: $ $(basname "$0") -5
+HELP
+}
+
+show_log() {
+    local log_count cmd
+    log_count="$1"
+
+    cmd=$(printf \
+        'SELECT * FROM commands ORDER BY datetime DESC LIMIT %d;' \
+        "$log_count")
+
+    exec sqlite3 -line ~/cli.db "$cmd"
+}
+
+main() {
+    local log_count
+    log_count=3
+
+    while [ -n "$1" ]; do
+        case "$1" in
+            --help|-h)
+                usage
+                exit 0
+            ;;
+        -*)
+            log_count="${1:1}"
+            ;;
+        esac
+        shift
+    done
+
+    show_log "$log_count"
+}
+
+main "$@"
