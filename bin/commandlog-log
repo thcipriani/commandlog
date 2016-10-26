@@ -7,28 +7,36 @@ usage() {
 $(basename "$0") [OPTIONS]
 
 OPTIONS:
-    -[NUM]       Where [NUM] is the number of commands to show
+    -o <columns>  Where <columns> is a comma-separated list of values to
+                  display in output.
+    -[NUM]        Where [NUM] is the number of commands to show.
 
-EXAMPLE:
+EXAMPLES:
 
-    Show last 5 commands: $ $(basename "$0") -5
+    Show last 5 commands:
+        $ $(basename "$0") -5
+    Show date and command of last 3 commands:
+        $ $(basename "$0") -o datetime,command
 HELP
 }
 
 show_log() {
     local log_count cmd
     log_count="$1"
+    columns="$2"
 
     cmd=$(printf \
-        'SELECT * FROM commands ORDER BY datetime DESC LIMIT %d;' \
+        'SELECT %s FROM commands ORDER BY datetime DESC LIMIT %d;' \
+        "$columns" \
         "$log_count")
 
     exec sqlite3 -line ~/cli.db "$cmd"
 }
 
 main() {
-    local log_count
+    local log_count columns
     log_count=3
+    columns='*'
 
     while [ -n "$1" ]; do
         case "$1" in
@@ -36,14 +44,18 @@ main() {
                 usage
                 exit 0
             ;;
-        -*)
-            log_count="${1:1}"
+            -o)
+                shift
+                columns="$1"
+                ;;
+            -*)
+                log_count="${1:1}"
             ;;
         esac
         shift
     done
 
-    show_log "$log_count"
+    show_log "$log_count" "$columns"
 }
 
 main "$@"
