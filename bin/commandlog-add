@@ -26,7 +26,7 @@ use Cwd;
 use DBI;
 use Sys::Hostname;
 
-my $dbfile = "/home/brennen/cli.db";
+my $dbfile = $ENV{HOME} . "/cli.db";
 
 my $init_new = 0;
 $init_new = 1 unless -f $dbfile;
