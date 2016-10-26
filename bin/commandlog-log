@@ -11,7 +11,7 @@ OPTIONS:
 
 EXAMPLE:
 
-    Show last 5 commands: $ $(basname "$0") -5
+    Show last 5 commands: $ $(basename "$0") -5
 HELP
 }
 
