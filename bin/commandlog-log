@@ -1,0 +1,3 @@
+#!/usr/bin/env bash
+
+sqlite3 -line ~/cli.db 'SELECT * FROM commands ORDER BY datetime DESC LIMIT 3;'

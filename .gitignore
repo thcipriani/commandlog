@@ -1,0 +1,8 @@
+blib
+_build
+Build
+MANIFEST
+MANIFEST.bak
+MANIFEST.SKIP.bak
+MYMETA.json
+MYMETA.yml

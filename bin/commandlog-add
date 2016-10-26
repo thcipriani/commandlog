@@ -1,0 +1,72 @@
+#!/usr/bin/env perl
+
+=pod
+
+=head1 NAME
+
+commandlog-add - log command line history and context to an sqlite db
+
+=head1 SYNOPSIS
+
+    # in zsh
+    function preexec {
+      commandlog add "$@"
+    }
+
+=head1 AUTHOR
+
+Brennen Bearnes <bbearnes@gmail.com>
+
+=cut
+
+use warnings;
+use strict;
+use 5.10.0;
+use Cwd;
+use DBI;
+use Sys::Hostname;
+
+my $dbfile = "/home/brennen/cli.db";
+
+my $init_new = 0;
+$init_new = 1 unless -f $dbfile;
+
+my $command = $ARGV[0];
+my $expanded_command = $ARGV[2];
+# say join "\n", @ARGV;
+
+# Skip things prefixed with a space:
+if ($command =~ m/^[ ]+/) {
+  exit;
+}
+
+my $dbh = DBI->connect("dbi:SQLite:dbname=$dbfile", "", "");
+
+# Make a new database and table(s), if needed:
+create_log_db($dbh) if $init_new;
+
+my $sth = $dbh->prepare(q{
+  INSERT INTO commands (command, expanded_command, path, hostname, username, shell, terminal, datetime)
+     VALUES (?, ?, ?, ?, ?, ?, ?, datetime('now'))
+});
+$sth->execute($command, $expanded_command, cwd(), hostname(), $ENV{USER}, $ENV{SHELL}, $ENV{TERM});
+
+# TODO: maybe log exit status, timing, memory, load, distro
+sub create_log_db {
+  my ($dbh) = @_;
+  $dbh->do(<<'SQL'
+    CREATE TABLE commands (
+      id integer primary key,
+      command text,
+      expanded_command text,
+      path text,
+      hostname text,
+      username text,
+      shell text,
+      terminal text,
+      notes text,
+      datetime text
+    );
+SQL
+  );
+}

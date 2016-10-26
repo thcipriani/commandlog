@@ -1,0 +1,25 @@
+#!/usr/bin/env bash
+
+# This is a wrapper for commandlog, a tool for logging command-line history
+
+function print_help() {
+  echo "Usage: $0 [command] [args]"
+  echo "    $0 add  Add a log entry."
+  echo "    $0 log  Show log entries."
+  echo "    $0 -h   Print this help message"
+  echo
+  echo "You must specify a command."
+  exit 1
+}
+
+if [[ $# -lt 1 ]]; then
+  print_help
+fi
+
+if [[ "$1" == "--help" ]] || [[ "$1" == "-h" ]]; then
+  print_help
+fi
+
+SUBPROG="commandlog-$1"
+shift
+exec $SUBPROG "$@"
